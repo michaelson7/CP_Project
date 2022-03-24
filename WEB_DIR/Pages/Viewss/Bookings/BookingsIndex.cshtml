@@ -1,0 +1,229 @@
+﻿@page
+@model WEB_DIR.Pages.Viewss.Bookings.BookingsIndexModel
+@{
+}
+
+<div>
+    <h4 class="mt-4"> Management Portal</h4>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active"><a href='@Url.Action("Index","Home")' class="ml-1 mr-1">Dashboard</a> / Bookings</li>
+    </ol>
+
+    <div>
+        <button onclick="resetButtons()" data-toggle="modal" data-target="#modal" class="btn btn-primary w-100">Add Booking</button>
+    </div>
+
+    <!-- database table -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <i class="fas fa-table mr-1"></i>
+            Current Bookings
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Service</th>
+                            <th>Date Booked</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="tableData"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal" class="modal fade ModelDialog" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <iframe name="dFrame" id="dummyframe" style="display: none;"></iframe>
+            <form id="formData" target="dFrame" enctype="multipart/form-data">
+                <input type="hidden" name="id" value="0" />
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group" contenteditable="true">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="font-weight-bold">Services <i class="icofont-rounded-down"></i></label>
+                                <select class="form-control" name="serviceId" id="serviceId" required>  </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="font-weight-bold">Users <i class="icofont-rounded-down"></i></label>
+                                <select class="form-control" name="userId" id="userId" required>  </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="font-weight-bold">Booking Date</label>
+                                <input type="date" class="form-control" name="bookingDate" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button id="btnCreate" type="button" class="btn btn-primary" onclick="dbHandler(false)">
+                        <span id="btnSpinner" class="d-none spinner-border  spinner-grow-sm" role="status" aria-hidden="true"></span>
+                        Save changes
+                    </button>
+                    <button id="btnUpdate" type="button" class="btn btn-warning d-none" onclick="dbHandler(true)">
+                        <span id="btnSpinnerUpdate" class="d-none spinner-border  spinner-grow-sm" role="status" aria-hidden="true"></span>
+                        Update
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(async function () {
+        await getData();
+        displayMainBody();
+    });
+
+    async function getData() {
+        $('#dataTable').DataTable({ "bDestroy": true }).clear();
+
+        //get services
+        await makeGetRequest(baseUrl + `getAllServices`).then(async response => {
+        if (response != null) {
+            for (i in response.results) {
+                var dataList = response.results[i];
+                $('#serviceId').append($('<option>', {
+                    value: dataList.id,
+                    text: dataList.title,
+                }));
+            }
+        }
+        });
+
+        //get getAllUsers
+        await makeGetRequest(baseUrl + `getAllUsers`).then(async response => {
+        if (response != null) {
+            for (i in response.results) {
+                var dataList = response.results[i];
+                $('#userId').append($('<option>', {
+                    value: dataList.id,
+                    text: dataList.names,
+                }));
+            }
+        }
+        });
+
+        //get account types
+        await makeGetRequest(baseUrl + `getAllBookings`).then(async response => {
+            if (response != null) {
+                for (i in response.results) {
+                    var dataList = response.results[i];
+                    $('#dataTable').DataTable({
+                        "order": [[0, "desc"]],
+                        "bDestroy": true
+                    }).row.add([
+                        dataList.id,
+                        dataList.usersModel.names,
+                        `<small><b>Title:</b></small> ${dataList.servicesModel.title}</br>
+                         <small><b>Cost:</b></small> ${dataList.servicesModel.cost}`,
+                        convertTimeStampToDate(dataList.bookingDate),
+                       
+                    ]).draw();
+                }
+            }
+        });
+    }
+
+    function editModel(index, src) {
+        $(`#btnUpdate`).removeClass('d-none');
+        $(`#btnCreate`).addClass('d-none');
+
+        switch (src) {
+            case "User":
+                var table = $('#dataTable').DataTable();
+
+                //get data
+                var id = table.row(index).data()[0];
+                var userName = table.row(index).data()[1];
+                var service = table.row(index).data()[2];
+                var booking = table.row(index).data()[3]; 
+
+                //add data
+                $('input[name=id]').val(id);
+                $('input[name=names]').val(names);
+                $('input[name=email]').val(email);
+                getSelectValue("accountTypeId", accountType);
+
+                //display model
+                $('#modal').modal('show');
+        }
+    }
+
+    //update and create
+    async function dbHandler(update) {
+        var url = "createBookings";
+        var spinnerClass = "btnSpinner";
+        if (update) {
+            url = "updateBookings";
+            spinnerClass = "btnSpinnerUpdate"
+        }
+        spinnerHandler(spinnerClass);
+
+        var formData = $('#formData').serializeArray().reduce(function (obj, item) {
+            obj[item.name] = item.value;
+            return obj;
+        }, {});
+        console.log(formData);
+
+        await makePostRequest(formData, baseUrl + url).then(async response => {
+            console.log(response);
+            if (response.error) {
+                alertify.error('Unsuccessful - ' + response.errorMessage);
+                console.log(response.errorMessage);
+            } else {
+                alertify.success("Booking Updated");
+                $('#modal').modal('hide');
+                await getData();
+            }
+        });
+
+        //update record in table
+        spinnerHandler(spinnerClass);
+    }
+
+    async function deleteFunction(id) {
+        var confirmText = "Are you sure you want to delete this?";
+        if (confirm(confirmText)) {
+            await makeGetRequest(baseUrl + `deleteUsers?id=${id}`).then(async response => {
+                if (response != null) {
+                    console.log(response);
+                    if (response.error) {
+                        alertify.error("Failed to Delete");
+                    } else {
+                        alertify.success("Successfuly Deleted");
+                        $('#dataTable').DataTable({ "bDestroy": true }).clear();
+                        await getData();
+                    }
+
+                }
+            });
+        }
+    }
+
+    function resetButtons(src) {
+        var elements = document.getElementsByTagName("input");
+        for (var ii = 0; ii < elements.length; ii++) {
+            if (elements[ii].type == "text") {
+                elements[ii].value = "";
+            }
+        }
+        $(`#btnCreate`).removeClass('d-none');
+        $(`#btnUpdate`).addClass('d-none');
+    }
+</script>

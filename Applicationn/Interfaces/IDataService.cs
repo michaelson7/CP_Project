@@ -1,0 +1,46 @@
+﻿using Domain.Models;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Applicationn.Interfaces
+{
+    public interface IDataService
+    {
+        //AccountType
+        Task<int> AccountTypeCreate(AccountTypeModel model);
+        Task AccountTypeUpdate(AccountTypeModel model);
+        Task AccountTypeDelete(int Id);
+        Task<AccountTypeModel> AccountTypeGet(int Id);
+        Task<List<AccountTypeModel>> AccountTypeGetAll();
+
+        //users
+        Task<int> UsersCreate(UsersModel model);
+        Task UsersUpdate(UsersModel model);
+        Task UsersDelete(int Id);
+        Task<UsersModel> UsersGet(int Id);
+        Task<List<UsersModel>> UsersGetAll();
+        Task UsersChangePassword(int Id, string newPassword);
+        Task<UsersModel> UsersLogin(string email, string password);
+
+        //Services
+        Task<int> ServicesCreate(ServicesModel model);
+        Task ServicesUpdate(ServicesModel model);
+        Task ServicesDelete(int Id);
+        Task<ServicesModel> ServicesGet(int Id);
+        Task<List<ServicesModel>> ServicesGetAll();
+
+        //Bookings
+        Task<int> BookingsCreate(BookingsModel model);
+        Task BookingsUpdate(BookingsModel model);
+        Task BookingsDelete(int Id);
+        Task<BookingsModel> BookingsGet(int Id);
+        Task<List<BookingsModel>> BookingsGetAll();
+
+        //Stats
+        Task<TransactionStats> TransactionStatsGet();
+        Task<List<MoneyStats>> StatsGetByWeek();
+        Task<List<MoneyStats>> StatsGetByYear();
+    }
+}

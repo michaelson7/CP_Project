@@ -1,0 +1,297 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div>
+    <h4 class="mt-4"> Management Portal</h4>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">Dashboard</li>
+    </ol>
+
+    <!-- colored cards stats -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <!-- fetch user# -->
+                    <h4>Transactions</h4>
+                    <span class="font-weight-bold" id="transNum">12<br>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <h4>Subscribers</h4>
+                    <span class="font-weight-bold" id="farnNums">65<br>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <h4>Bookings</h4>
+                    <span class="font-weight-bold" id="deviceNum">34<br>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <h4>Services</h4>
+                    <span id="revenuNum"><b>8965</b><br>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- charts -->
+    <div class="row">
+        <!-- sold products -->
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-area mr-1"></i>
+                    Transactions per Month <i class="small">(ZMK)</i>
+                </div>
+                <div class="card-body"><canvas id="monthRecords" width="100%" height="40"></canvas></div>
+            </div>
+        </div>
+
+        <!-- best selling products -->
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar mr-1"></i>
+                    Transactions for past Week <i class="small">(ZMK)</i>
+                </div>
+                <div class="card-body"><canvas id="weekRecords" width="100%" height="40"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- database table -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <i class="fas fa-table mr-1"></i>
+            Current Bookings
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Service</th>
+                            <th>Date Booked</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="tableData"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(async function () {
+        await generateCharts();
+        await getStats();
+        await getData();
+        displayMainBody();
+    });
+
+     async function getStats() {
+        await makeGetRequest(baseUrl + `getStatTransaction`).then(response => {
+            if (response != null) {
+                var dataList = response.results;
+                $('#transNum').html(dataList.bookingsCount);
+                $('#farnNums').html(dataList.userCount);
+                $('#deviceNum').html(dataList.serviceCount);
+                $('#revenuNum').html(converToMoneyFormat(dataList.transactionValue));
+            }
+        });
+    }
+
+     async function generateCharts() {
+        await makeGetRequest(baseUrl + `StatsGetByYear`).then(response => {
+            if (response != null) {
+                var data = [];
+                var label = [];
+                for (i in response.results) {
+                    var colors = getRandomColor();
+                    var dataList = response.results[i];
+
+                    data.push(dataList.total);
+                    label.push(getMonth(dataList.month));
+
+                    var ctx = document.getElementById('monthRecords').getContext('2d');
+                    var myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: label,
+                            datasets: [{
+                                label: `2022 Transactions`,
+                                data: data,
+                                borderColor: colors,
+
+                            }]
+                        }
+                    });
+                }
+            }
+        });
+
+        await makeGetRequest(baseUrl + `StatsGetByWeek`).then(response => {
+            if (response != null) {
+                var data = [];
+                var label = [];
+                for (i in response.results) {
+                    var colors = getRandomColor();
+                    var dataList = response.results[i];
+
+                    data.push(dataList.total);
+                    label.push(getDay(dataList.week));
+
+                    var ctx = document.getElementById('weekRecords').getContext('2d');
+                    var myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: label,
+                            datasets: [{
+                                label: `${getMonth(dataList.month)} Transactions`,
+                                data: data,
+                                borderColor: colors,
+                            }]
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    async function getData() {
+        $('#dataTable').DataTable({ "bDestroy": true }).clear();
+
+        //get services
+        await makeGetRequest(baseUrl + `getAllServices`).then(async response => {
+        if (response != null) {
+            for (i in response.results) {
+                var dataList = response.results[i];
+                $('#serviceId').append($('<option>', {
+                    value: dataList.id,
+                    text: dataList.title,
+                }));
+            }
+        }
+        });
+
+        //get getAllUsers
+        await makeGetRequest(baseUrl + `getAllUsers`).then(async response => {
+        if (response != null) {
+            for (i in response.results) {
+                var dataList = response.results[i];
+                $('#userId').append($('<option>', {
+                    value: dataList.id,
+                    text: dataList.names,
+                }));
+            }
+        }
+        });
+
+        //get account types
+        await makeGetRequest(baseUrl + `getAllBookings`).then(async response => {
+            if (response != null) {
+                for (i in response.results) {
+                    var dataList = response.results[i];
+                    $('#dataTable').DataTable({
+                        "order": [[0, "desc"]],
+                        "bDestroy": true
+                    }).row.add([
+                        dataList.id,
+                        dataList.usersModel.names,
+                        `<small><b>Title:</b></small> ${dataList.servicesModel.title}</br>
+                         <small><b>Cost:</b></small> ${dataList.servicesModel.cost}`,
+                        convertTimeStampToDate(dataList.bookingDate),
+                       
+                    ]).draw();
+                }
+            }
+        });
+    }
+
+     function getMonth(num) {
+        var month;
+        switch (num) {
+            case 1:
+                month = "January"
+                break;
+            case 2:
+                month = "February"
+                break;
+            case 3:
+                month = "March"
+                break;
+            case 4:
+                month = "April"
+                break;
+            case 5:
+                month = "May"
+                break;
+            case 6:
+                month = "June"
+                break;
+            case 7:
+                month = "July"
+                break;
+            case 8:
+                month = "August"
+                break;
+            case 9:
+                month = "September"
+                break;
+            case 10:
+                month = "October"
+                break;
+            case 11:
+                month = "November"
+                break;
+            case 12:
+                month = "December"
+                break;
+        }
+        return month;
+    }
+
+    function getDay(num) {
+        var month;
+        console.log(num);
+        switch (num) {
+            case 1:
+                month = "Sun"
+                break;
+            case 2:
+                month = "Mon"
+                break;
+            case 3:
+                month = "Tue"
+                break;
+            case 4:
+                month = "Wed"
+                break;
+            case 5:
+                month = "Thur"
+                break;
+            case 6:
+                month = "Fri"
+                break;
+            case 7:
+                month = "Sat"
+        }
+        return month;
+    }
+</script>
