@@ -26,7 +26,7 @@
                         <tr>
                             <th>ID</th>
                             <th>User</th>
-                            <th>Service</th>
+                            <th>Service</th> 
                             <th>Date Booked</th>
 
                         </tr>
@@ -53,15 +53,19 @@
                 <div class="modal-body">
                     <div class="form-group" contenteditable="true">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="font-weight-bold">Services <i class="icofont-rounded-down"></i></label>
                                 <select class="form-control" name="serviceId" id="serviceId" required>  </select>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <label class="font-weight-bold">Car Model <i class="icofont-rounded-down"></i></label>
+                                <select class="form-control" name="ModelId" id="ModelId" required>  </select>
+                            </div>
+                            <div class="col-md-4">
                                 <label class="font-weight-bold">Users <i class="icofont-rounded-down"></i></label>
                                 <select class="form-control" name="userId" id="userId" required>  </select>
-                            </div>
-                            <div class="col-md-12">
+                            </div> 
+                            <div class="col-md-12 mt-4">
                                 <label class="font-weight-bold">Booking Date</label>
                                 <input type="date" class="form-control" name="bookingDate" required>
                             </div>
@@ -106,6 +110,19 @@
         }
         });
 
+        //get model
+        await makeGetRequest(baseUrl + `getAllModels`).then(async response => {
+            if (response != null) {
+                for (i in response.results) {
+                    var dataList = response.results[i];
+                    $('#ModelId').append($('<option>', {
+                        value: dataList.id,
+                        text: dataList.title,
+                    }));
+                }
+            }
+        });
+
         //get getAllUsers
         await makeGetRequest(baseUrl + `getAllUsers`).then(async response => {
         if (response != null) {
@@ -131,7 +148,8 @@
                         dataList.id,
                         dataList.usersModel.names,
                         `<small><b>Title:</b></small> ${dataList.servicesModel.title}</br>
-                         <small><b>Cost:</b></small> ${dataList.servicesModel.cost}`,
+                         <small><b>Cost:</b></small> ${dataList.servicesModel.cost}</br>
+                         <small><b>Model:</b></small> ${dataList.modelsModel.title}`,
                         convertTimeStampToDate(dataList.bookingDate),
                        
                     ]).draw();

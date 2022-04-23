@@ -31,6 +31,14 @@ namespace Applicationn.Interfaces
         Task<ServicesModel> ServicesGet(int Id);
         Task<List<ServicesModel>> ServicesGetAll();
 
+
+        //Models
+        Task<int> ModelsCreate(ModelsModel model);
+        Task ModelsUpdate(ModelsModel model);
+        Task ModelsDelete(int Id);
+        Task<ModelsModel> ModelsGet(int Id);
+        Task<List<ModelsModel>> ModelsGetAll();
+
         //Bookings
         Task<int> BookingsCreate(BookingsModel model);
         Task BookingsUpdate(BookingsModel model);

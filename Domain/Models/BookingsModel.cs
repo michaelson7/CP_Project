@@ -9,9 +9,11 @@ namespace Domain.Models
         public int Id { get; set; }
         public int UserId { get; set; }
         public int ServiceId { get; set; }
+        public int ModelId { get; set; }
         public DateTime Timestamp { get; set; }
         public DateTime BookingDate { get; set; } = DateTime.Now;
         public ServicesModel ServicesModel { get; set; }
         public UsersModel UsersModel { get; set; }
+        public ModelsModel ModelsModel { get; set; }
     }
 }

@@ -32,6 +32,13 @@ namespace Infrustructure.StoredProcedures
         public string ServicesGet = baseValue + "ServicesGet";
         public string ServicesGetAll = baseValue + "ServicesGetAll";
 
+        //Models
+        public string ModelsCreate = baseValue + "ModelsCreate";
+        public string ModelsUpdate = baseValue + "ModelsUpdate";
+        public string ModelsDelete = baseValue + "ModelsDelete";
+        public string ModelsGet = baseValue + "ModelsGet";
+        public string ModelsGetAll = baseValue + "ModelsGetAll";
+
         //Bookings
         public string BookingsCreate = baseValue + "BookingsCreate";
         public string BookingsUpdate = baseValue + "BookingsUpdate";

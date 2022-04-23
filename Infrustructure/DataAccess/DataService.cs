@@ -70,12 +70,11 @@ namespace Infrustructure.DataAccess
 
         public async Task<List<AccountTypeModel>> AccountTypeGetAll()
         {
-            List<AccountTypeModel> output = new List<AccountTypeModel>();
-            output = await _db.LoadDataAsync<AccountTypeModel, dynamic>(_sp.AccountTypeGetAll,
-                                                 new
-                                                 { },
-                                                 connectionStringName,
-                                                 true);
+            var output = await _db.LoadDataAsync<AccountTypeModel, dynamic>(_sp.AccountTypeGetAll,
+                                                   new
+                                                   { },
+                                                   connectionStringName,
+                                                   true);
 
 
             return output;
@@ -271,6 +270,69 @@ namespace Infrustructure.DataAccess
         }
 
 
+        //Models
+        public async Task<int> ModelsCreate(ModelsModel model)
+        {
+            int output = 0;
+            output = await _db.SaveDataAsync(_sp.ModelsCreate,
+                                             new
+                                             {
+                                                 Title = model.Title,
+                                                 ImagePath = model.ImagePath,
+                                             },
+                                             connectionStringName,
+                                             true);
+            return output;
+        }
+
+        public async Task ModelsUpdate(ModelsModel model)
+        {
+            await _db.SaveDataAsync(_sp.ModelsUpdate,
+                                             new
+                                             {
+                                                 Id = model.Id,
+                                                 Title = model.Title,
+                                                 ImagePath = model.ImagePath,
+                                             },
+                                             connectionStringName,
+                                             true);
+        }
+
+        public async Task ModelsDelete(int Id)
+        {
+            await _db.SaveDataAsync(_sp.ModelsDelete,
+                                              new
+                                              {
+                                                  Id = Id
+                                              },
+                                              connectionStringName,
+                                              true);
+        }
+
+        public async Task<ModelsModel> ModelsGet(int Id)
+        {
+            ModelsModel output = new ModelsModel();
+            var list = await _db.LoadDataAsync<ModelsModel, dynamic>(_sp.ModelsGet,
+                                                 new
+                                                 { Id = Id },
+                                                 connectionStringName,
+                                                 true);
+            output = list.FirstOrDefault();
+            return output;
+        }
+
+        public async Task<List<ModelsModel>> ModelsGetAll()
+        {
+            List<ModelsModel> output = new List<ModelsModel>();
+            output = await _db.LoadDataAsync<ModelsModel, dynamic>(_sp.ModelsGetAll,
+                                                 new
+                                                 { },
+                                                 connectionStringName,
+                                                 true);
+            return output;
+        }
+
+
         //Bookings
         public async Task<int> BookingsCreate(BookingsModel model)
         {
@@ -279,6 +341,7 @@ namespace Infrustructure.DataAccess
                                              new
                                              {
                                                  UserId = model.UserId,
+                                                 ModelId = model.ModelId,
                                                  ServiceId = model.ServiceId,
                                                  BookingDate = model.BookingDate,
                                              },
@@ -293,6 +356,7 @@ namespace Infrustructure.DataAccess
                                              new
                                              {
                                                  UserId = model.UserId,
+                                                 ModelId = model.ModelId,
                                                  Id = model.Id,
                                                  ServiceId = model.ServiceId,
                                                  BookingDate = model.BookingDate,
@@ -326,6 +390,7 @@ namespace Infrustructure.DataAccess
             {
                 output.UsersModel = await UsersGet(output.UserId);
                 output.ServicesModel = await ServicesGet(output.ServiceId);
+                output.ModelsModel = await ModelsGet(output.ModelId);
             }
             return output;
         }
@@ -344,6 +409,7 @@ namespace Infrustructure.DataAccess
                 {
                     data.UsersModel = await UsersGet(data.UserId);
                     data.ServicesModel = await ServicesGet(data.ServiceId);
+                    data.ModelsModel = await ModelsGet(data.ModelId);
                 }
             }
             return output;

@@ -1,10 +1,10 @@
-﻿using Applicationn.Interfaces;
+﻿using API.Services;
+using Applicationn.Interfaces;
 using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System;
-using API.Services;
 
 namespace API.Controllers
 {
@@ -30,10 +30,11 @@ namespace API.Controllers
                     var output = await _db.BookingsCreate(model);
                     return _response.getResponse(output, "Error while creating Bookings");
                 }
-                else {
+                else
+                {
                     return _response.errorResponse("Invalid Model");
                 }
-              
+
             }
             catch (Exception e)
             {
