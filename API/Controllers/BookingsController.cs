@@ -74,6 +74,21 @@ namespace API.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("getAllBookingsById")]
+        public async Task<ActionResult<IEnumerable<BookingsModel>>> BookingsGetByUserId(int userId)
+        {
+            try
+            {
+                var output = await _db.BookingsGetByUserId(userId);
+                return _response.getResponse(output, "Bookings not found");
+            }
+            catch (Exception e)
+            {
+                return _response.errorResponse(e.Message);
+            }
+        }
+
         //update
         [HttpPost]
         [Route("updateBookings")]

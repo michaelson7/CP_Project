@@ -25,6 +25,13 @@ namespace Infrustructure.StoredProcedures
         public string AccountTypeGet = baseValue + "AccountTypeGet";
         public string AccountTypeGetAll = baseValue + "AccountTypeGetAll";
 
+        //Location
+        public string LocationCreate = baseValue + "LocationCreate";
+        public string LocationUpdate = baseValue + "LocationUpdate";
+        public string LocationDelete = baseValue + "LocationDelete";
+        public string LocationGet = baseValue + "LocationGet";
+        public string LocationGetAll = baseValue + "LocationGetAll";
+
         //Services
         public string ServicesCreate = baseValue + "ServicesCreate";
         public string ServicesUpdate = baseValue + "ServicesUpdate";
@@ -41,6 +48,7 @@ namespace Infrustructure.StoredProcedures
 
         //Bookings
         public string BookingsCreate = baseValue + "BookingsCreate";
+        public string BookingsGetByUserId = baseValue + "BookingsGetByUserId";
         public string BookingsUpdate = baseValue + "BookingsUpdate";
         public string BookingsDelete = baseValue + "BookingsDelete";
         public string BookingsGet = baseValue + "BookingsGet";

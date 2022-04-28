@@ -15,6 +15,14 @@ namespace Applicationn.Interfaces
         Task<AccountTypeModel> AccountTypeGet(int Id);
         Task<List<AccountTypeModel>> AccountTypeGetAll();
 
+
+        //Location
+        Task<int> LocationCreate(LocationModel model);
+        Task LocationUpdate(LocationModel model);
+        Task LocationDelete(int Id);
+        Task<LocationModel> LocationGet(int Id);
+        Task<List<LocationModel>> LocationGetAll();
+
         //users
         Task<int> UsersCreate(UsersModel model);
         Task UsersUpdate(UsersModel model);
@@ -45,6 +53,7 @@ namespace Applicationn.Interfaces
         Task BookingsDelete(int Id);
         Task<BookingsModel> BookingsGet(int Id);
         Task<List<BookingsModel>> BookingsGetAll();
+        Task<List<BookingsModel>> BookingsGetByUserId(int id);
 
         //Stats
         Task<TransactionStats> TransactionStatsGet();

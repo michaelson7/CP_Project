@@ -20,6 +20,7 @@ namespace Infrustructure.DataAccess
             _db = db;
         }
 
+
         //AccountType//
         public async Task<int> AccountTypeCreate(AccountTypeModel model)
         {
@@ -71,6 +72,72 @@ namespace Infrustructure.DataAccess
         public async Task<List<AccountTypeModel>> AccountTypeGetAll()
         {
             var output = await _db.LoadDataAsync<AccountTypeModel, dynamic>(_sp.AccountTypeGetAll,
+                                                   new
+                                                   { },
+                                                   connectionStringName,
+                                                   true);
+
+
+            return output;
+        }
+
+
+        //Location
+        public async Task<int> LocationCreate(LocationModel model)
+        {
+            int output = 0;
+            output = await _db.SaveDataAsync(_sp.LocationCreate,
+                                             new
+                                             {
+                                                 Title = model.Title,
+                                                 Latitude = model.Latitude,
+                                                 Longitude = model.Longitude
+
+                                             },
+                                             connectionStringName,
+                                             true);
+            return output;
+        }
+
+        public async Task LocationUpdate(LocationModel model)
+        {
+            await _db.SaveDataAsync(_sp.LocationUpdate,
+                                             new
+                                             {
+                                                 Id = model.Id,
+                                                 Title = model.Title,
+                                                 Latitude = model.Latitude,
+                                                 Longitude = model.Longitude
+                                             },
+                                             connectionStringName,
+                                             true);
+        }
+
+        public async Task LocationDelete(int Id)
+        {
+            await _db.SaveDataAsync(_sp.LocationDelete,
+                                              new
+                                              {
+                                                  Id = Id
+                                              },
+                                              connectionStringName,
+                                              true);
+        }
+
+        public async Task<LocationModel> LocationGet(int Id)
+        {
+            var list = await _db.LoadDataAsync<LocationModel, dynamic>(_sp.LocationGet,
+                                                 new
+                                                 { Id = Id },
+                                                 connectionStringName,
+                                                 true);
+
+            return list.FirstOrDefault();
+        }
+
+        public async Task<List<LocationModel>> LocationGetAll()
+        {
+            var output = await _db.LoadDataAsync<LocationModel, dynamic>(_sp.LocationGetAll,
                                                    new
                                                    { },
                                                    connectionStringName,
@@ -401,6 +468,26 @@ namespace Infrustructure.DataAccess
             output = await _db.LoadDataAsync<BookingsModel, dynamic>(_sp.BookingsGetAll,
                                                  new
                                                  { },
+                                                 connectionStringName,
+                                                 true);
+            if (output != null)
+            {
+                foreach (var data in output)
+                {
+                    data.UsersModel = await UsersGet(data.UserId);
+                    data.ServicesModel = await ServicesGet(data.ServiceId);
+                    data.ModelsModel = await ModelsGet(data.ModelId);
+                }
+            }
+            return output;
+        }
+
+        public async Task<List<BookingsModel>> BookingsGetByUserId(int id)
+        {
+            List<BookingsModel> output = new List<BookingsModel>();
+            output = await _db.LoadDataAsync<BookingsModel, dynamic>(_sp.BookingsGetByUserId,
+                                                 new
+                                                 { userId = id },
                                                  connectionStringName,
                                                  true);
             if (output != null)
